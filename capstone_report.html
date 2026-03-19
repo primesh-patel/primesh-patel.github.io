@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Real Estate Analytics Report — Primesh Patel</title>
+
+<!-- Sticky top nav -->
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#f8fafc;font-family:sans-serif}
+
+/* TOP NAV BAR */
+.rpt-nav{
+  position:sticky;top:0;z-index:999;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:56px;
+  background:rgba(15,23,42,0.97);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.rpt-nav-left{display:flex;align-items:center;gap:16px}
+.rpt-back{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:#94a3b8;text-decoration:none;
+  padding:7px 14px;border-radius:7px;
+  border:1px solid rgba(255,255,255,.1);
+  transition:all .2s;
+}
+.rpt-back:hover{color:white;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.06)}
+.rpt-nav-title{
+  font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;
+  color:rgba(255,255,255,.5);letter-spacing:.02em;
+}
+.rpt-nav-badge{
+  font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:600;
+  color:#38bdf8;background:rgba(56,189,248,.1);
+  border:1px solid rgba(56,189,248,.2);
+  padding:3px 10px;border-radius:100px;letter-spacing:.08em;
+}
+
+/* Progress bar */
+.rpt-progress{
+  position:fixed;top:56px;left:0;right:0;height:3px;
+  background:rgba(255,255,255,.05);z-index:998;
+}
+.rpt-progress-fill{
+  height:100%;width:0%;
+  background:linear-gradient(90deg,#0ea5e9,#818cf8);
+  transition:width .1s linear;
+  border-radius:0 2px 2px 0;
+}
+
+/* Read time chip */
+.rpt-read-chip{
+  position:fixed;bottom:24px;right:24px;z-index:900;
+  background:rgba(15,23,42,.9);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:100px;padding:8px 16px;
+  font-family:'JetBrains Mono',monospace;font-size:.68rem;
+  color:#94a3b8;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+  display:flex;align-items:center;gap:6px;
+}
+.rpt-read-chip span{color:#38bdf8;font-weight:600}
+
+@media(max-width:600px){
+  .rpt-nav{padding:0 16px}
+  .rpt-nav-title{display:none}
+  .rpt-read-chip{bottom:16px;right:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="rpt-nav">
+  <div class="rpt-nav-left">
+    <a href="index.html" class="rpt-back">← Back to Portfolio</a>
+    <span class="rpt-nav-title">Real Estate Analytics Report</span>
+  </div>
+  <span class="rpt-nav-badge">Capstone Project</span>
+</nav>
+
+<!-- READING PROGRESS BAR -->
+<div class="rpt-progress"><div class="rpt-progress-fill" id="progressFill"></div></div>
+
+<!-- READ TIME CHIP -->
+<div class="rpt-read-chip">📖 Reading: <span id="readPct">0%</span></div>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;600&display=swap');
+
+.rpt-wrap *{box-sizing:border-box;margin:0;padding:0}
+.rpt-wrap{font-family:'DM Sans',sans-serif;color:#1e293b;background:#f8fafc;padding:0 0 80px}
+
+/* ── HERO ── */
+.rpt-hero{
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#0f172a 100%);
+  padding:70px 24px 60px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.rpt-hero::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle at 20% 50%,rgba(14,165,233,0.12) 0%,transparent 50%),
+                   radial-gradient(circle at 80% 20%,rgba(99,102,241,0.1) 0%,transparent 40%);
+}
+.rpt-hero-badge{
+  display:inline-block;background:rgba(14,165,233,0.15);
+  border:1px solid rgba(14,165,233,0.4);color:#38bdf8;
+  padding:6px 18px;border-radius:100px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  margin-bottom:24px;position:relative;
+}
+.rpt-hero h1{
+  font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3.4rem);font-weight:800;
+  color:#f1f5f9;line-height:1.1;letter-spacing:-.02em;position:relative;
+}
+.rpt-hero h1 span{
+  background:linear-gradient(90deg,#38bdf8,#818cf8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.rpt-hero-sub{color:#94a3b8;font-size:1.05rem;margin-top:16px;font-weight:300;position:relative}
+.rpt-hero-stats{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:40px;
+  margin-top:44px;position:relative;
+}
+.rpt-stat{text-align:center}
+.rpt-stat-n{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:#38bdf8}
+.rpt-stat-l{font-size:.72rem;color:#64748b;text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+
+/* ── SECTION WRAPPER ── */
+.rpt-section{max-width:860px;margin:56px auto 0;padding:0 20px}
+.rpt-sec-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:#0ea5e9;margin-bottom:8px}
+.rpt-sec-title{font-family:'Syne',sans-serif;font-size:clamp(1.5rem,3vw,2.1rem);font-weight:800;color:#0f172a;letter-spacing:-.02em}
+.rpt-sec-desc{color:#64748b;margin-top:8px;font-size:.95rem;font-weight:300;line-height:1.75}
+
+/* ── PIPELINE ── */
+.rpt-pipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:2px;background:#e2e8f0;border-radius:14px;overflow:hidden;margin-top:32px}
+.rpt-pipe-step{background:#fff;padding:20px 12px;text-align:center;transition:background .2s}
+.rpt-pipe-step:hover{background:#f0f9ff}
+.rpt-pipe-icon{font-size:1.6rem;margin-bottom:8px}
+.rpt-pipe-num{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:#94a3b8;letter-spacing:.1em}
+.rpt-pipe-name{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;color:#0f172a;margin-top:4px;line-height:1.3}
+
+/* ── CHAPTER CARDS ── */
+.rpt-chapters{display:flex;flex-direction:column;gap:24px;margin-top:36px}
+.rpt-chapter{background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;transition:box-shadow .2s,border-color .2s}
+.rpt-chapter:hover{box-shadow:0 8px 32px rgba(14,165,233,.08);border-color:#bae6fd}
+.rpt-ch-header{display:flex;align-items:flex-start;gap:16px;padding:24px 24px 20px;border-bottom:1px solid #f1f5f9}
+.rpt-ch-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.rpt-ch-meta{flex:1}
+.rpt-ch-tag{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:#0ea5e9;margin-bottom:4px}
+.rpt-ch-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:#0f172a}
+.rpt-ch-sub{color:#94a3b8;font-size:.85rem;margin-top:2px}
+.rpt-ch-body{padding:20px 24px}
+.rpt-ch-body p{color:#475569;font-size:.92rem;line-height:1.8}
+.rpt-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.rpt-tag{font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:4px 10px;border-radius:100px;background:#f1f5f9;border:1px solid #e2e8f0;color:#64748b}
+
+/* ── HIGHLIGHT BOX ── */
+.rpt-highlight{background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1px solid #bfdbfe;border-radius:14px;padding:20px 24px;margin-top:16px}
+.rpt-highlight p{color:#1e40af;font-size:.9rem;font-weight:500;line-height:1.7}
+.rpt-highlight strong{color:#1d4ed8}
+
+/* ── STAT GRID ── */
+.rpt-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-top:16px}
+.rpt-stat-box{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;text-align:center}
+.rpt-stat-box-n{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:#0f172a}
+.rpt-stat-box-l{font-size:.78rem;color:#94a3b8;margin-top:4px;text-transform:uppercase;letter-spacing:.07em}
+.rpt-stat-box-c{font-size:.75rem;color:#0ea5e9;margin-top:2px;font-weight:500}
+
+/* ── STEPS ── */
+.rpt-steps{display:flex;flex-direction:column;gap:0;margin-top:20px}
+.rpt-step{display:flex;gap:16px;padding:14px 0;position:relative}
+.rpt-step:not(:last-child)::after{content:'';position:absolute;left:16px;top:44px;bottom:0;width:1px;background:#e2e8f0}
+.rpt-step-dot{width:32px;height:32px;border-radius:50%;background:#0ea5e9;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#fff;flex-shrink:0;z-index:1;font-weight:600}
+.rpt-step-body{padding-top:4px}
+.rpt-step-name{font-weight:600;font-size:.95rem;color:#0f172a}
+.rpt-step-desc{color:#64748b;font-size:.85rem;margin-top:3px;line-height:1.6}
+
+/* ── TABLE ── */
+.rpt-table-wrap{overflow-x:auto;margin-top:20px;border-radius:12px;border:1px solid #e2e8f0}
+.rpt-table{width:100%;border-collapse:collapse;font-size:.86rem}
+.rpt-table th{background:#f8fafc;color:#475569;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;padding:10px 16px;text-align:left;border-bottom:1px solid #e2e8f0}
+.rpt-table td{padding:10px 16px;border-bottom:1px solid #f1f5f9;color:#334155}
+.rpt-table tr:last-child td{border-bottom:none}
+.rpt-table tr:hover td{background:#f8fafc}
+.rpt-pill{display:inline-block;padding:2px 10px;border-radius:100px;font-size:.72rem;font-weight:600}
+.rpt-pill-green{background:#dcfce7;color:#15803d}
+.rpt-pill-blue{background:#dbeafe;color:#1d4ed8}
+.rpt-pill-yellow{background:#fef9c3;color:#a16207}
+.rpt-pill-red{background:#fee2e2;color:#dc2626}
+
+/* ── BAR CHART ── */
+.rpt-bars{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+.rpt-bar-row{display:flex;align-items:center;gap:12px}
+.rpt-bar-lbl{width:120px;font-size:.8rem;color:#64748b;text-align:right;flex-shrink:0}
+.rpt-bar-track{flex:1;height:10px;background:#f1f5f9;border-radius:100px;overflow:hidden}
+.rpt-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#0ea5e9,#818cf8)}
+.rpt-bar-val{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:#0ea5e9;min-width:36px}
+
+/* ── INSIGHTS ── */
+.rpt-insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:20px}
+.rpt-insight{background:#fff;border-left:3px solid #0ea5e9;border-radius:0 12px 12px 0;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.04)}
+.rpt-insight-title{font-weight:600;font-size:.9rem;color:#0f172a;margin-bottom:6px}
+.rpt-insight p{color:#64748b;font-size:.83rem;line-height:1.6}
+
+/* ── DIVIDER ── */
+.rpt-divider{max-width:860px;margin:48px auto 0;padding:0 20px}
+.rpt-divider hr{border:none;border-top:1px solid #e2e8f0}
+
+/* ── FOOTER ── */
+.rpt-footer{background:#0f172a;color:#94a3b8;text-align:center;padding:40px 24px;margin-top:60px;font-size:.85rem}
+.rpt-footer strong{color:#38bdf8;font-family:'Syne',sans-serif}
+
+@media(max-width:600px){
+  .rpt-ch-header{flex-direction:column}
+  .rpt-bar-lbl{width:80px;font-size:.72rem}
+}
+</style>
+
+<div class="rpt-wrap">
+
+<!-- ══ HERO ══ -->
+<div class="rpt-hero">
+  <div class="rpt-hero-badge">📊 Capstone Project Report</div>
+  <h1>End-to-End <span>Real Estate Analytics</span><br>Web Scraping to Model Predictions</h1>
+  <p class="rpt-hero-sub">A complete data science pipeline — from raw 99acres.com data to a live Streamlit app.<br>Domain: Gurgaon Residential Market | Property Types: Flats & Houses</p>
+  <div class="rpt-hero-stats">
+    <div class="rpt-stat"><div class="rpt-stat-n">3,961</div><div class="rpt-stat-l">Merged Records</div></div>
+    <div class="rpt-stat"><div class="rpt-stat-n">11</div><div class="rpt-stat-l">Pipeline Stages</div></div>
+    <div class="rpt-stat"><div class="rpt-stat-n">130+</div><div class="rpt-stat-l">Engineered Features</div></div>
+    <div class="rpt-stat"><div class="rpt-stat-n">5+</div><div class="rpt-stat-l">ML Models Tested</div></div>
+  </div>
+</div>
+
+<!-- ══ PIPELINE OVERVIEW ══ -->
+<div class="rpt-section">
+  <div class="rpt-sec-label">Project Pipeline</div>
+  <div class="rpt-sec-title">11-Stage End-to-End Workflow</div>
+  <p class="rpt-sec-desc">Every stage from raw data collection to a deployed analytics product, built step-by-step.</p>
+
+  <div class="rpt-pipe">
+    <div class="rpt-pipe-step"><div class="rpt-pipe-icon">🕷️</div><div class="rpt-pipe-num">01</div><div class="rpt-pipe-name">Web Scraping</div></div>
+    <div class="rpt-pipe-step"><div class="rpt-pipe-icon">🧹</div><div class="rpt-pipe-num">02</div><div class="rpt-pipe-name">Preprocessing L1</div></div>
+    <div class="rpt-pipe-step"><div class="rpt-pipe-icon">🔧</div><div class="rpt-pipe-num">03</div><div class="rpt-pipe-name">Preprocessing L2</div></div>
+    <div class="rpt-pipe-step"><div class="rpt-pipe-icon">⚙️</div><div class="rpt-pipe-num">04</div><div class="rpt-pipe-name">Feature Engineering</div></div>
+    <div class="rpt-pipe-step"><div class="rpt-pipe-icon">📊</div><div class="rpt-pipe-num">05</div><div class="rpt-pipe-name">EDA</div></div>
+    <div class="rpt-pipe-step"><div class="rpt-pipe-icon">🎯</div><div class="rpt-pipe-num">06</div><div class="rpt-pipe-name">Outlier Detection</div></div>
+    <div class="rpt-pipe-step"><div class="rpt-pipe-icon">🩹</div><div class="rpt-pipe-num">07</div><div class="rpt-pipe-name">Missing Value Imputation</div></div>
+    <div class="rpt-pipe-step"><div class="rpt-pipe-icon">🔍</div><div class="rpt-pipe-num">08</div><div class="rpt-pipe-name">Feature Selection</div></div>
+    <div class="rpt-pipe-step"><div class="rpt-pipe-icon">🤖</div><div class="rpt-pipe-num">09</div><div class="rpt-pipe-name">Model Selection</div></div>
+    <div class="rpt-pipe-step"><div class="rpt-pipe-icon">📈</div><div class="rpt-pipe-num">10</div><div class="rpt-pipe-name">Analytics Module</div></div>
+    <div class="rpt-pipe-step"><div class="rpt-pipe-icon">🏠</div><div class="rpt-pipe-num">11</div><div class="rpt-pipe-name">Recommender + App</div></div>
+  </div>
+</div>
+
+<div class="rpt-divider"><hr></div>
+
+<!-- ══ STAGE 1: DATA COLLECTION ══ -->
+<div class="rpt-section">
+  <div class="rpt-sec-label">Stage 01</div>
+  <div class="rpt-sec-title">Data Collection via Web Scraping</div>
+
+  <div class="rpt-chapters">
+    <div class="rpt-chapter">
+      <div class="rpt-ch-header">
+        <div class="rpt-ch-icon" style="background:#eff6ff">🕷️</div>
+        <div class="rpt-ch-meta">
+          <div class="rpt-ch-tag">Source · 99acres.com</div>
+          <div class="rpt-ch-title">Scraping Gurgaon Real Estate Listings</div>
+          <div class="rpt-ch-sub">Raw data collection from India's leading real estate platform</div>
+        </div>
+      </div>
+      <div class="rpt-ch-body">
+        <p>Data was collected using web scraping techniques directly from 99acres.com, targeting residential properties in Gurgaon. Two separate datasets were scraped — one for <strong>Flats</strong> and one for <strong>Houses</strong> — capturing features like price, area, bedrooms, bathrooms, balcony, floor number, society, nearby locations, and amenities.</p>
+
+        <div class="rpt-stat-grid" style="margin-top:20px">
+          <div class="rpt-stat-box"><div class="rpt-stat-box-n">3,028</div><div class="rpt-stat-box-l">Flats Records</div><div class="rpt-stat-box-c">20 columns</div></div>
+          <div class="rpt-stat-box"><div class="rpt-stat-box-n">1,095</div><div class="rpt-stat-box-l">Houses Records</div><div class="rpt-stat-box-c">21 columns</div></div>
+          <div class="rpt-stat-box"><div class="rpt-stat-box-n">639</div><div class="rpt-stat-box-l">Unique Societies (Flats)</div><div class="rpt-stat-box-c">Flats dataset</div></div>
+          <div class="rpt-stat-box"><div class="rpt-stat-box-n">188</div><div class="rpt-stat-box-l">Unique Societies (Houses)</div><div class="rpt-stat-box-c">Houses dataset</div></div>
+        </div>
+
+        <div class="rpt-highlight" style="margin-top:20px">
+          <p><strong>Key Columns (Flats):</strong> property_name, price, area, price_per_sqft, bedRoom, bathroom, balcony, additionalRoom, address, floorNum, facing, agePossession, nearbyLocations, furnishDetails, features, rating</p>
+        </div>
+
+        <div class="rpt-tags">
+          <span class="rpt-tag">BeautifulSoup</span>
+          <span class="rpt-tag">Requests</span>
+          <span class="rpt-tag">Pandas</span>
+          <span class="rpt-tag">99acres.com</span>
+          <span class="rpt-tag">Gurgaon Market</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rpt-divider"><hr></div>
+
+<!-- ══ STAGE 2: PREPROCESSING ══ -->
+<div class="rpt-section">
+  <div class="rpt-sec-label">Stages 02 & 03</div>
+  <div class="rpt-sec-title">Data Preprocessing — Level 1 & 2</div>
+  <p class="rpt-sec-desc">Transforming messy raw data into a clean, structured, analysis-ready dataset through two levels of cleaning.</p>
+
+  <div class="rpt-chapters">
+    <div class="rpt-chapter">
+      <div class="rpt-ch-header">
+        <div class="rpt-ch-icon" style="background:#f0fdf4">🧹</div>
+        <div class="rpt-ch-meta">
+          <div class="rpt-ch-tag">Level 1 · Per-Dataset Cleaning</div>
+          <div class="rpt-ch-title">Initial Data Cleaning & Standardisation</div>
+          <div class="rpt-ch-sub">Cleaning each dataset independently before merging</div>
+        </div>
+      </div>
+      <div class="rpt-ch-body">
+        <div class="rpt-steps">
+          <div class="rpt-step">
+            <div class="rpt-step-dot">01</div>
+            <div class="rpt-step-body">
+              <div class="rpt-step-name">Duplicate Removal</div>
+              <div class="rpt-step-desc">Flats: 0 duplicates found. Houses: 13 duplicate rows removed → reduced to 1,082 rows.</div>
+            </div>
+          </div>
+          <div class="rpt-step">
+            <div class="rpt-step-dot">02</div>
+            <div class="rpt-step-body">
+              <div class="rpt-step-name">Missing Value Analysis</div>
+              <div class="rpt-step-desc">Flats: additionalRoom had 1,333 missing. Houses: society had 619 missing. Facing column: filled nulls with 'NA'.</div>
+            </div>
+          </div>
+          <div class="rpt-step">
+            <div class="rpt-step-dot">03</div>
+            <div class="rpt-step-body">
+              <div class="rpt-step-name">Price Normalisation</div>
+              <div class="rpt-step-desc">Removed "Price on Request" entries. Standardised all prices to Crores (₹). Removed ₹/sq.ft. symbols from price_per_sqft.</div>
+            </div>
+          </div>
+          <div class="rpt-step">
+            <div class="rpt-step-dot">04</div>
+            <div class="rpt-step-body">
+              <div class="rpt-step-name">Column Cleaning</div>
+              <div class="rpt-step-desc">Dropped link & property_id (non-informative). Renamed 'area' → price_per_sqft for clarity. Cleaned society names: removed star ratings (★) and inconsistent formatting.</div>
+            </div>
+          </div>
+          <div class="rpt-step">
+            <div class="rpt-step-dot">05</div>
+            <div class="rpt-step-body">
+              <div class="rpt-step-name">Type Conversion</div>
+              <div class="rpt-step-desc">Converted "3 Bedrooms" → integer 3. Floor strings like "4th of 4 Floors" → integer 4. Ground=0, Basement=-1, Lower=0.</div>
+            </div>
+          </div>
+          <div class="rpt-step">
+            <div class="rpt-step-dot">06</div>
+            <div class="rpt-step-body">
+              <div class="rpt-step-name">Area Calculation</div>
+              <div class="rpt-step-desc">Created 'area' column using formula: area = (price × 10,000,000) ÷ price_per_sqft. Applied to both datasets consistently.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rpt-stat-grid" style="margin-top:24px">
+          <div class="rpt-stat-box"><div class="rpt-stat-box-n">2,997</div><div class="rpt-stat-box-l">Flats after L1</div><div class="rpt-stat-box-c">20 columns</div></div>
+          <div class="rpt-stat-box"><div class="rpt-stat-box-n">964</div><div class="rpt-stat-box-l">Houses after L1</div><div class="rpt-stat-box-c">20 columns</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rpt-chapter">
+      <div class="rpt-ch-header">
+        <div class="rpt-ch-icon" style="background:#fefce8">🔧</div>
+        <div class="rpt-ch-meta">
+          <div class="rpt-ch-tag">Level 2 · Merged Dataset Cleaning</div>
+          <div class="rpt-ch-title">Advanced Cleaning on Merged Dataset</div>
+          <div class="rpt-ch-sub">Post-merge preprocessing on the unified 3,961-row dataset</div>
+        </div>
+      </div>
+      <div class="rpt-ch-body">
+        <p>After merging both datasets (Flats + Houses), the combined dataset had <strong>3,961 rows × 20 columns</strong>. Level 2 preprocessing focused on creating the Sector column, handling remaining nulls, and dropping non-essential columns.</p>
+
+        <div class="rpt-steps" style="margin-top:16px">
+          <div class="rpt-step">
+            <div class="rpt-step-dot">01</div>
+            <div class="rpt-step-body">
+              <div class="rpt-step-name">Sector Column Creation</div>
+              <div class="rpt-step-desc">Extracted sector info from address data. Cleaned messy entries. Retained only sectors appearing 3+ times → Dataset: 3,803 rows × 21 columns.</div>
+            </div>
+          </div>
+          <div class="rpt-step">
+            <div class="rpt-step-dot">02</div>
+            <div class="rpt-step-body">
+              <div class="rpt-step-name">Column Pruning</div>
+              <div class="rpt-step-desc">Dropped property_name, address, description, and rating — not useful for modelling.</div>
+            </div>
+          </div>
+          <div class="rpt-step">
+            <div class="rpt-step-dot">03</div>
+            <div class="rpt-step-body">
+              <div class="rpt-step-name">Duplicate Resolution</div>
+              <div class="rpt-step-desc">Found 122 duplicate rows post-merge. Scheduled for removal in feature engineering stage.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rpt-highlight" style="margin-top:20px">
+          <p>📌 <strong>Columns flagged for Feature Engineering:</strong> areaWithType, additionalRoom, facing, agePossession, furnishDetails, features</p>
+        </div>
+        <div class="rpt-tags">
+          <span class="rpt-tag">Pandas</span><span class="rpt-tag">Regex</span><span class="rpt-tag">String Cleaning</span><span class="rpt-tag">DataFrame Merge</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rpt-divider"><hr></div>
+
+<!-- ══ STAGE 4: FEATURE ENGINEERING ══ -->
+<div class="rpt-section">
+  <div class="rpt-sec-label">Stage 04</div>
+  <div class="rpt-sec-title">Feature Engineering</div>
+  <p class="rpt-sec-desc">Converting raw text columns into structured, model-ready features using parsing, categorisation, and clustering.</p>
+
+  <div class="rpt-chapters">
+    <div class="rpt-chapter">
+      <div class="rpt-ch-header">
+        <div class="rpt-ch-icon" style="background:#fdf4ff">⚙️</div>
+        <div class="rpt-ch-meta">
+          <div class="rpt-ch-tag">Feature Engineering · 6 Major Transformations</div>
+          <div class="rpt-ch-title">Creating Structured Features from Raw Text</div>
+          <div class="rpt-ch-sub">From messy strings to clean numeric and categorical features</div>
+        </div>
+      </div>
+      <div class="rpt-ch-body">
+
+        <div class="rpt-table-wrap">
+          <table class="rpt-table">
+            <thead><tr><th>Column</th><th>Transformation</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td><strong>areaWithType</strong></td><td>Split into super_built_up_area, built_up_area, carpet_area. Plot areas merged into built_up_area.</td><td><span class="rpt-pill rpt-pill-blue">3 new features</span></td></tr>
+              <tr><td><strong>additionalRoom</strong></td><td>Unique categories extracted → one-hot encoded binary features</td><td><span class="rpt-pill rpt-pill-blue">Multiple binary cols</span></td></tr>
+              <tr><td><strong>agePossession</strong></td><td>Converted to 5 categories: New Property, Relatively New, Moderately Old, Old Property, Under Construction</td><td><span class="rpt-pill rpt-pill-green">5 categories</span></td></tr>
+              <tr><td><strong>furnishDetails</strong></td><td>Extracted 19 furnishing items → KMeans clustering (elbow: k=3) → Unfurnished / Semifurnished / Furnished</td><td><span class="rpt-pill rpt-pill-green">furnishing_type col</span></td></tr>
+              <tr><td><strong>features</strong></td><td>Extracted 130 unique amenities. Assigned luxury scores (Golf Course=10, Pool=8, Jacuzzi=9…)</td><td><span class="rpt-pill rpt-pill-yellow">luxury_score col</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="rpt-highlight" style="margin-top:20px">
+          <p>🏆 <strong>Luxury Score Logic:</strong> Each property's amenity features were scored — Golf Course (10), Security Personnel (9), Jacuzzi (9), Swimming Pool (8), 24/7 Power Backup (8) — then aggregated into a single luxury_score per property.</p>
+        </div>
+
+        <div class="rpt-stat-grid" style="margin-top:16px">
+          <div class="rpt-stat-box"><div class="rpt-stat-box-n">23</div><div class="rpt-stat-box-l">Final Columns</div><div class="rpt-stat-box-c">After FE</div></div>
+          <div class="rpt-stat-box"><div class="rpt-stat-box-n">3,803</div><div class="rpt-stat-box-l">Rows Retained</div><div class="rpt-stat-box-c">Post engineering</div></div>
+          <div class="rpt-stat-box"><div class="rpt-stat-box-n">130+</div><div class="rpt-stat-box-l">Amenity Features</div><div class="rpt-stat-box-c">Extracted from text</div></div>
+        </div>
+
+        <div class="rpt-tags">
+          <span class="rpt-tag">KMeans Clustering</span><span class="rpt-tag">Elbow Method</span><span class="rpt-tag">One-Hot Encoding</span><span class="rpt-tag">Custom Scoring</span><span class="rpt-tag">Regex Parsing</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rpt-divider"><hr></div>
+
+<!-- ══ STAGE 5: EDA ══ -->
+<div class="rpt-section">
+  <div class="rpt-sec-label">Stage 05</div>
+  <div class="rpt-sec-title">Exploratory Data Analysis (EDA)</div>
+  <p class="rpt-sec-desc">Uncovering patterns, distributions, and relationships across all key variables.</p>
+
+  <div class="rpt-chapters">
+    <div class="rpt-chapter">
+      <div class="rpt-ch-header">
+        <div class="rpt-ch-icon" style="background:#fff7ed">📊</div>
+        <div class="rpt-ch-meta">
+          <div class="rpt-ch-tag">Univariate + Multivariate Analysis</div>
+          <div class="rpt-ch-title">Key EDA Findings</div>
+          <div class="rpt-ch-sub">Distribution, correlations, and market insights</div>
+        </div>
+      </div>
+      <div class="rpt-ch-body">
+
+        <p>Analysis covered property type distribution, price distribution, sector frequency, bedrooms/bathrooms/balconies, floor numbers, facing direction, area types, furnishing, and luxury scores.</p>
+
+        <!-- Price Stats Visual -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:20px">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:#0f172a;margin-bottom:16px">📉 Price Distribution (in Crores ₹)</div>
+          <div class="rpt-bars">
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">Minimum</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:1%"></div></div><div class="rpt-bar-val">₹0.07Cr</div></div>
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">25th %ile</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:15%"></div></div><div class="rpt-bar-val">₹0.95Cr</div></div>
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">Median</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:26%"></div></div><div class="rpt-bar-val">₹1.52Cr</div></div>
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">Mean</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:30%"></div></div><div class="rpt-bar-val">₹2.53Cr</div></div>
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">75th %ile</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:43%"></div></div><div class="rpt-bar-val">₹2.75Cr</div></div>
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">Maximum</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:100%"></div></div><div class="rpt-bar-val">₹31.5Cr</div></div>
+          </div>
+          <div style="margin-top:14px;font-size:.82rem;color:#94a3b8">Skewness: <strong style="color:#0ea5e9">3.28</strong> &nbsp;|&nbsp; Kurtosis: <strong style="color:#0ea5e9">14.93</strong> &nbsp;|&nbsp; Outliers detected: <strong style="color:#ef4444">425</strong> &nbsp;|&nbsp; After log transform skewness: <strong style="color:#22c55e">1.07</strong></div>
+        </div>
+
+        <!-- Bedroom distribution -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:16px">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:#0f172a;margin-bottom:16px">🛏️ Bedroom Distribution</div>
+          <div class="rpt-bars">
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">3 BHK</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:76%"></div></div><div class="rpt-bar-val">1,437</div></div>
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">2 BHK</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:50%"></div></div><div class="rpt-bar-val">944</div></div>
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">4 BHK</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:32%"></div></div><div class="rpt-bar-val">~600</div></div>
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">5+ BHK</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:10%"></div></div><div class="rpt-bar-val">~200</div></div>
+          </div>
+        </div>
+
+        <!-- Sector Frequency -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:16px">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:#0f172a;margin-bottom:16px">📍 Sector Frequency Distribution</div>
+          <div class="rpt-table-wrap" style="margin-top:0">
+            <table class="rpt-table">
+              <thead><tr><th>Frequency Category</th><th>Listings Range</th><th>No. of Sectors</th></tr></thead>
+              <tbody>
+                <tr><td>Very High</td><td>&gt; 100 listings</td><td><span class="rpt-pill rpt-pill-red">3</span></td></tr>
+                <tr><td>High</td><td>50 – 100 listings</td><td><span class="rpt-pill rpt-pill-yellow">25</span></td></tr>
+                <tr><td>Average</td><td>10 – 49 listings</td><td><span class="rpt-pill rpt-pill-blue">60</span></td></tr>
+                <tr><td>Low</td><td>2 – 9 listings</td><td><span class="rpt-pill rpt-pill-green">16</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Age of Possession -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:16px">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:#0f172a;margin-bottom:16px">🏗️ Property Age / Possession Status</div>
+          <div class="rpt-bars">
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">Relatively New</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:82%"></div></div><div class="rpt-bar-val">1,646</div></div>
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">New Property</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:30%"></div></div><div class="rpt-bar-val">593</div></div>
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">Moderately Old</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:28%"></div></div><div class="rpt-bar-val">563</div></div>
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">Old Property</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:15%"></div></div><div class="rpt-bar-val">303</div></div>
+            <div class="rpt-bar-row"><div class="rpt-bar-lbl">Under Construction</div><div class="rpt-bar-track"><div class="rpt-bar-fill" style="width:13%"></div></div><div class="rpt-bar-val">266</div></div>
+          </div>
+        </div>
+
+        <div class="rpt-insights" style="margin-top:20px">
+          <div class="rpt-insight">
+            <div class="rpt-insight-title">🏢 Flats Dominate</div>
+            <p>Flats significantly outnumber houses in the Gurgaon market, reflecting the city's high-rise residential trend.</p>
+          </div>
+          <div class="rpt-insight">
+            <div class="rpt-insight-title">💰 Right-Skewed Prices</div>
+            <p>Price distribution is heavily right-skewed (skew=3.28). Log transformation brings it closer to normal (skew=1.07).</p>
+          </div>
+          <div class="rpt-insight">
+            <div class="rpt-insight-title">🛏️ 3BHK Most Common</div>
+            <p>3-bedroom flats dominate the dataset with 1,437 listings, followed by 2BHK at 944.</p>
+          </div>
+          <div class="rpt-insight">
+            <div class="rpt-insight-title">🌟 Luxury Score Range</div>
+            <p>Luxury scores range from 0 to 174 with median at 59 — wide variation indicating diverse property tiers.</p>
+          </div>
+        </div>
+
+        <div class="rpt-tags">
+          <span class="rpt-tag">Matplotlib</span><span class="rpt-tag">Seaborn</span><span class="rpt-tag">Histograms</span><span class="rpt-tag">Box Plots</span><span class="rpt-tag">ECDF</span><span class="rpt-tag">Pie Charts</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rpt-divider"><hr></div>
+
+<!-- ══ STAGES 6 & 7: OUTLIERS + MISSING ══ -->
+<div class="rpt-section">
+  <div class="rpt-sec-label">Stages 06 & 07</div>
+  <div class="rpt-sec-title">Outlier Detection & Missing Value Imputation</div>
+
+  <div class="rpt-chapters">
+    <div class="rpt-chapter">
+      <div class="rpt-ch-header">
+        <div class="rpt-ch-icon" style="background:#fff1f2">🎯</div>
+        <div class="rpt-ch-meta">
+          <div class="rpt-ch-tag">Stage 06 · Outlier Detection</div>
+          <div class="rpt-ch-title">Identifying & Handling Extreme Values</div>
+          <div class="rpt-ch-sub">IQR-based bounds, visual verification, and targeted removal</div>
+        </div>
+      </div>
+      <div class="rpt-ch-body">
+        <p>Price outliers were identified using the IQR method. Lower Bound: <strong>-1.75 Cr</strong> (effectively 0), Upper Bound: <strong>5.45 Cr</strong>. A total of <strong>425 outliers</strong> were detected in the price column alone. Whisker plots and ECDF plots were used to visually confirm outlier boundaries. After log transformation, extreme skewness was reduced significantly.</p>
+        <div class="rpt-highlight" style="margin-top:16px">
+          <p>🔍 <strong>Method:</strong> IQR-based bounds + log transformation for price. Visual confirmation via box plots and ECDF before removal.</p>
+        </div>
+        <div class="rpt-tags" style="margin-top:16px">
+          <span class="rpt-tag">IQR Method</span><span class="rpt-tag">Log Transform</span><span class="rpt-tag">Box Plots</span><span class="rpt-tag">ECDF Analysis</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rpt-chapter">
+      <div class="rpt-ch-header">
+        <div class="rpt-ch-icon" style="background:#f0fdf4">🩹</div>
+        <div class="rpt-ch-meta">
+          <div class="rpt-ch-tag">Stage 07 · Missing Value Imputation</div>
+          <div class="rpt-ch-title">Strategic Null Value Handling</div>
+          <div class="rpt-ch-sub">Context-aware imputation strategies per column</div>
+        </div>
+      </div>
+      <div class="rpt-ch-body">
+        <div class="rpt-table-wrap">
+          <table class="rpt-table">
+            <thead><tr><th>Column</th><th>Missing Count</th><th>Strategy</th></tr></thead>
+            <tbody>
+              <tr><td>super_built_up_area</td><td>1,802</td><td>Derived from other area columns or KNN imputation</td></tr>
+              <tr><td>built_up_area</td><td>1,987</td><td>Imputed from related features; plot areas merged</td></tr>
+              <tr><td>carpet_area</td><td>1,805</td><td>Cross-imputed using built_up_area ratio</td></tr>
+              <tr><td>facing</td><td>1,045</td><td>Filled with 'NA' category</td></tr>
+              <tr><td>additionalRoom</td><td>1,333</td><td>Filled with "not available"</td></tr>
+              <tr><td>features</td><td>481 remaining</td><td>Cross-filled from secondary scraped dataset</td></tr>
+              <tr><td>price / price_per_sqft</td><td>17</td><td>Rows dropped (minimal loss)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="rpt-tags" style="margin-top:16px">
+          <span class="rpt-tag">KNN Imputation</span><span class="rpt-tag">Median Fill</span><span class="rpt-tag">Cross-Dataset Fill</span><span class="rpt-tag">Categorical Fill</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rpt-divider"><hr></div>
+
+<!-- ══ STAGES 8 & 9: FEATURE SELECTION + MODEL ══ -->
+<div class="rpt-section">
+  <div class="rpt-sec-label">Stages 08 & 09</div>
+  <div class="rpt-sec-title">Feature Selection & Model Building</div>
+
+  <div class="rpt-chapters">
+    <div class="rpt-chapter">
+      <div class="rpt-ch-header">
+        <div class="rpt-ch-icon" style="background:#eff6ff">🔍</div>
+        <div class="rpt-ch-meta">
+          <div class="rpt-ch-tag">Stage 08 · Feature Selection</div>
+          <div class="rpt-ch-title">Selecting the Most Impactful Predictors</div>
+          <div class="rpt-ch-sub">Reducing dimensionality while preserving predictive power</div>
+        </div>
+      </div>
+      <div class="rpt-ch-body">
+        <p>With 130+ engineered features, a systematic selection process was applied to identify the most predictive variables for property price estimation. Correlation analysis, feature importance from tree models, and domain knowledge guided this stage.</p>
+        <div class="rpt-insights" style="margin-top:16px">
+          <div class="rpt-insight"><div class="rpt-insight-title">📏 Area Features</div><p>super_built_up_area, built_up_area, carpet_area — strongest numeric correlates with price.</p></div>
+          <div class="rpt-insight"><div class="rpt-insight-title">📍 Location (Sector)</div><p>Sector was one of the highest-importance categorical features — Gurgaon's location premium is real.</p></div>
+          <div class="rpt-insight"><div class="rpt-insight-title">🛏️ Configuration</div><p>bedRoom, bathroom, balcony — standard BHK configuration strongly influences pricing.</p></div>
+          <div class="rpt-insight"><div class="rpt-insight-title">🌟 Luxury Score</div><p>The custom luxury_score feature proved highly predictive, capturing premium amenity value.</p></div>
+        </div>
+        <div class="rpt-tags" style="margin-top:16px">
+          <span class="rpt-tag">Correlation Matrix</span><span class="rpt-tag">Feature Importance</span><span class="rpt-tag">VIF Analysis</span><span class="rpt-tag">Mutual Information</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rpt-chapter">
+      <div class="rpt-ch-header">
+        <div class="rpt-ch-icon" style="background:#fdf4ff">🤖</div>
+        <div class="rpt-ch-meta">
+          <div class="rpt-ch-tag">Stage 09 · Model Selection</div>
+          <div class="rpt-ch-title">Comparing & Selecting the Best ML Model</div>
+          <div class="rpt-ch-sub">Price prediction using regression models with cross-validation</div>
+        </div>
+      </div>
+      <div class="rpt-ch-body">
+        <p>Multiple regression models were trained and evaluated for property price prediction. The target variable was log-transformed price (in crores). Models compared using R² score and RMSE via cross-validation.</p>
+
+        <div class="rpt-table-wrap">
+          <table class="rpt-table">
+            <thead><tr><th>Model</th><th>Type</th><th>Performance</th></tr></thead>
+            <tbody>
+              <tr><td>Random Forest Regressor</td><td>Ensemble</td><td><span class="rpt-pill rpt-pill-green">Best Performer</span></td></tr>
+              <tr><td>Gradient Boosting (XGBoost)</td><td>Boosting</td><td><span class="rpt-pill rpt-pill-blue">Strong</span></td></tr>
+              <tr><td>Decision Tree</td><td>Tree</td><td><span class="rpt-pill rpt-pill-yellow">Moderate</span></td></tr>
+              <tr><td>Linear Regression</td><td>Linear</td><td><span class="rpt-pill rpt-pill-yellow">Baseline</span></td></tr>
+              <tr><td>Ridge / Lasso</td><td>Regularised</td><td><span class="rpt-pill rpt-pill-yellow">Regularised</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="rpt-highlight" style="margin-top:20px">
+          <p>🏆 <strong>Final Model:</strong> Random Forest / Gradient Boosting ensemble selected for the Streamlit app based on highest R² and best cross-validation performance. Log-transformed target (price) was used to handle skewness.</p>
+        </div>
+
+        <div class="rpt-tags" style="margin-top:16px">
+          <span class="rpt-tag">Random Forest</span><span class="rpt-tag">XGBoost</span><span class="rpt-tag">Cross-Validation</span><span class="rpt-tag">R² Score</span><span class="rpt-tag">RMSE</span><span class="rpt-tag">sklearn Pipeline</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rpt-divider"><hr></div>
+
+<!-- ══ STAGES 10 & 11: MODULES ══ -->
+<div class="rpt-section">
+  <div class="rpt-sec-label">Stages 10 & 11</div>
+  <div class="rpt-sec-title">Analytics Module, Recommender System & Insight Module</div>
+
+  <div class="rpt-chapters">
+    <div class="rpt-chapter">
+      <div class="rpt-ch-header">
+        <div class="rpt-ch-icon" style="background:#fff7ed">📈</div>
+        <div class="rpt-ch-meta">
+          <div class="rpt-ch-tag">Stage 10 · Analytics Module</div>
+          <div class="rpt-ch-title">Interactive Property Analytics Dashboard</div>
+          <div class="rpt-ch-sub">Sector-wise price maps, scatter plots, and distribution comparisons</div>
+        </div>
+      </div>
+      <div class="rpt-ch-body">
+        <p>The Analytics Module provides interactive visualisations for the Gurgaon real estate market, allowing users to explore price distributions by sector, compare property types, and understand how features like BHK count, furnishing, and age affect pricing.</p>
+
+        <div class="rpt-stat-grid" style="margin-top:16px">
+          <div class="rpt-stat-box"><div class="rpt-stat-box-n">📍</div><div class="rpt-stat-box-l">Sector Price Maps</div><div class="rpt-stat-box-c">Geo visualisation</div></div>
+          <div class="rpt-stat-box"><div class="rpt-stat-box-n">📦</div><div class="rpt-stat-box-l">Box Plot Comparisons</div><div class="rpt-stat-box-c">By BHK & type</div></div>
+          <div class="rpt-stat-box"><div class="rpt-stat-box-n">🔥</div><div class="rpt-stat-box-l">Feature Heatmaps</div><div class="rpt-stat-box-c">Correlation analysis</div></div>
+          <div class="rpt-stat-box"><div class="rpt-stat-box-n">📊</div><div class="rpt-stat-box-l">Scatter Plots</div><div class="rpt-stat-box-c">Area vs Price</div></div>
+        </div>
+        <div class="rpt-tags" style="margin-top:16px">
+          <span class="rpt-tag">Plotly</span><span class="rpt-tag">Folium Maps</span><span class="rpt-tag">Seaborn</span><span class="rpt-tag">Streamlit</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="rpt-chapter">
+      <div class="rpt-ch-header">
+        <div class="rpt-ch-icon" style="background:#f0fdf4">🏠</div>
+        <div class="rpt-ch-meta">
+          <div class="rpt-ch-tag">Stage 11 · Recommender + Insight Module</div>
+          <div class="rpt-ch-title">Property Recommender System & Key Insights</div>
+          <div class="rpt-ch-sub">Similarity-based property recommendations using cosine similarity</div>
+        </div>
+      </div>
+      <div class="rpt-ch-body">
+        <p>The Recommender System helps users find similar properties based on their preferences (sector, BHK, price range, furnishing type). Built using cosine similarity on the engineered feature space.</p>
+        <p style="margin-top:12px">The Insight Module consolidates all findings into actionable market recommendations for buyers, sellers, and investors in the Gurgaon residential market.</p>
+
+        <div class="rpt-insights" style="margin-top:20px">
+          <div class="rpt-insight">
+            <div class="rpt-insight-title">🏡 For Buyers</div>
+            <p>Sectors showing high demand growth with relatively affordable prices identified for first-time buyers.</p>
+          </div>
+          <div class="rpt-insight">
+            <div class="rpt-insight-title">💼 For Investors</div>
+            <p>Appreciation trends over 12 months predicted using historical data — certain sectors show strong ROI signals.</p>
+          </div>
+          <div class="rpt-insight">
+            <div class="rpt-insight-title">🏷️ For Sellers</div>
+            <p>Price benchmarking module helps sellers position properties competitively within their sector.</p>
+          </div>
+        </div>
+
+        <div class="rpt-tags" style="margin-top:16px">
+          <span class="rpt-tag">Cosine Similarity</span><span class="rpt-tag">Content-Based Filtering</span><span class="rpt-tag">Streamlit App</span><span class="rpt-tag">Price Predictor</span><span class="rpt-tag">Market Insights</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rpt-divider"><hr></div>
+
+<!-- ══ FINAL SUMMARY ══ -->
+<div class="rpt-section">
+  <div class="rpt-sec-label">Project Summary</div>
+  <div class="rpt-sec-title">What Was Built</div>
+  <p class="rpt-sec-desc">A complete, production-grade real estate analytics system — from raw scraping to a live Streamlit web application.</p>
+
+  <div class="rpt-stat-grid" style="margin-top:28px">
+    <div class="rpt-stat-box"><div class="rpt-stat-box-n">3,961</div><div class="rpt-stat-box-l">Total Records</div><div class="rpt-stat-box-c">Flats + Houses merged</div></div>
+    <div class="rpt-stat-box"><div class="rpt-stat-box-n">11</div><div class="rpt-stat-box-l">Pipeline Stages</div><div class="rpt-stat-box-c">End-to-end</div></div>
+    <div class="rpt-stat-box"><div class="rpt-stat-box-n">130+</div><div class="rpt-stat-box-l">Features Engineered</div><div class="rpt-stat-box-c">From raw text</div></div>
+    <div class="rpt-stat-box"><div class="rpt-stat-box-n">5+</div><div class="rpt-stat-box-l">ML Models Tested</div><div class="rpt-stat-box-c">Best model deployed</div></div>
+    <div class="rpt-stat-box"><div class="rpt-stat-box-n">3</div><div class="rpt-stat-box-l">App Modules</div><div class="rpt-stat-box-c">Analytics, Recommender, Insights</div></div>
+    <div class="rpt-stat-box"><div class="rpt-stat-box-n">Streamlit</div><div class="rpt-stat-box-l">Deployment</div><div class="rpt-stat-box-c">Live web app</div></div>
+  </div>
+
+  <div class="rpt-highlight" style="margin-top:28px">
+    <p>✅ <strong>Project Goal Achieved:</strong> A fully functional real estate analytics platform was built for the Gurgaon residential market — providing price predictions, market analytics, and property recommendations — all powered by real-world scraped data and a robust ML pipeline.</p>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<div class="rpt-footer">
+  <strong style="color:#38bdf8">Primesh Patel</strong> · End-to-End Real Estate Analytics · Gurgaon Market · 2024
+</div>
+
+</div>
+
+
+</div><!-- end rpt-wrap -->
+
+<script>
+// Reading progress bar
+const fill = document.getElementById('progressFill');
+const pct  = document.getElementById('readPct');
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const total    = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = total > 0 ? Math.round((scrolled / total) * 100) : 0;
+  fill.style.width = progress + '%';
+  pct.textContent  = progress + '%';
+});
+</script>
+</body>
+</html>
